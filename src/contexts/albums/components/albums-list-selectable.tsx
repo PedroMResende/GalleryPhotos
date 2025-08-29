@@ -1,5 +1,5 @@
 import type {Photo} from "../../photos/models/photo"; 
-import type { Album } from "../../albums/models/album";
+import type { Album } from "../models/album";
 import React from "react";
 import Text from "../../../components/text";
 import InputCheckBox from "../../../components/input-checkbox";

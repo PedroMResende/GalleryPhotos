@@ -23,10 +23,10 @@ export const badgeVariants = tv({
 })
 
 export const badgeTextVariants = tv ({
-    base:"text-xs", 
+    base:"truncate text-xs", 
     variants: { 
         size: { 
-            xs: "w-12 h-[1.375rem]", 
+            xs: "w-16 h-[1.375rem]", 
             sm: "w-16 h-[1.875rem]", 
         }
     }, 

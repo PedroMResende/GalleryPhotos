@@ -10,7 +10,7 @@ interface PhotoListProps {
 
 export default function PhotosList({
     photos, 
-    loading
+    loading, 
 }: PhotoListProps) { 
     return (
         <div className="space-y-6">

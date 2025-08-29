@@ -20,7 +20,7 @@ export default function PhotoWidget({
         <div className="flex flex-col gap-4">
             {!loading ? (
                 <ImagePreview
-                src={`/images/${photo.imageId}`}
+                src={`${import.meta.env.VITE_IMAGES_URL}/${photo.imageId}`}
                 title={photo.title} 
                 imageClassName="w-[13.5625rem] h-[13.5625rem] rounded-lg justify-center"
                 />
@@ -31,7 +31,7 @@ export default function PhotoWidget({
                 />
             )}
 
-            <div className="flex flex-col gap-2">
+            <div className=" truncate flex flex-col gap-2">
                 {!loading ? ( 
                     <Text variant="paragraph-large" className="truncate">{photo.title}</Text>
                 ) : (
@@ -45,11 +45,11 @@ export default function PhotoWidget({
                                 {album.title} 
                             </Badge>
                         ))}
-                        {photo.albums.length > 2 && <Badge size="xs">+{photo.albums.length - 2}</Badge>}
+                        {photo.albums.length > 2 && <Badge className="truncate" size="xs">+{photo.albums.length - 2}</Badge>}
                         </>
                     ): ( 
                         Array.from({length: 2}).map((_, index) => 
-                        <Skeleton key={`album-loading-${index}`} className="w-full h-4 rounded-sm"/>
+                        <Skeleton key={`album-loading-${index}`} className=" truncate w-full h-4 rounded-sm"/>
                     ) 
                     )}
                 </div>
