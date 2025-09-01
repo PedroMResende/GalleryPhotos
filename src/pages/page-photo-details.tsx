@@ -1,6 +1,6 @@
 import Container from "../components/container";
 import Text from "../components/text" ; 
-import {useParams} from "react-router" ; 
+import {Link, useParams} from "react-router" ; 
 import type { Photo } from "../contexts/photos/models/photo";
 import Skeleton from "../components/skeleton";
 import PhotoNavigator from "../contexts/photos/components/photo-navigator";
@@ -8,27 +8,24 @@ import ImagePreview from "../components/image-preview";
 import Button from "../components/button";
 import AlbumsListSelectable from "../contexts/albums/components/albums-list-selectable";
 import useAlbums from "../contexts/albums/hooks/use-album";
+import usePhoto from "../contexts/photos/hooks/use-photo";
 
 
 export default function PagePhotoDetails() { 
     const {id} = useParams() ; 
+    const {albums, isLoadingAlbums} = useAlbums(); 
+    const{photo, isLoadingPhoto, previousPhotoId, nextPhotoId} = usePhoto(id) ; 
+    
     // apenas para testar o mock 
-    const {albums, isLoadingAlbums} = useAlbums()
 
-    const isLoadingPhoto = false; 
+    if(!isLoadingPhoto && !photo) { 
+        return (
+            <div>
+                Foto não encontrada.
+            </div>
+        )
+    }
 
-    const photo = {
-         
-                    id: "123", 
-                    title: "olá mundo", 
-                    imageId:"portrait-tower.png", 
-                    albums: [
-                        {id:"2342", title:"Album1"}, 
-                        {id:"2323", title:"Album2"}, 
-                        {id:"12312312", title: "Album3"}
-                    ]
-                
-    } as Photo ; 
     return ( 
         <Container>
             <header className="flex items-center justify-between gap-8 mb-8">
@@ -40,14 +37,14 @@ export default function PagePhotoDetails() {
                     <Skeleton className="w-48 h-8"/>
                 )}
 
-                <PhotoNavigator loading={isLoadingPhoto}/>
+                <PhotoNavigator previousPhotoId={previousPhotoId} nextPhotoId={nextPhotoId} loading={isLoadingPhoto}/>
             </header>
 
             <div className="grid grid-cols-[21rem_1fr] gap-24">
                 <div className="space-y-3">
                     {!isLoadingPhoto ? ( 
                         <ImagePreview
-                        src={`/images/${photo?.imageId}`}
+                        src={`${import.meta.env.VITE_IMAGES_URL}/${photo?.imageId}`}
                         title={photo?.title}
                         imageClassName="h-[21rem]"
                         />
@@ -57,7 +54,12 @@ export default function PagePhotoDetails() {
                         />
                     )}
                     {!isLoadingPhoto ? (
+                        <div className="flex justify-between">
                         <Button variant="destructive"> Excluir </Button>
+                        <Link to="/">
+                        <Button variant="secondary"> Voltar </Button>
+                        </Link>
+                        </div>
                     ) : (
                         <Skeleton className="w-20 h-10"/>
                     )}
@@ -67,7 +69,7 @@ export default function PagePhotoDetails() {
                         Álbuns 
                     </Text>
                     <AlbumsListSelectable
-                    photo={photo}
+                    photo={photo as Photo}
                     albums={albums}
                     loading={isLoadingAlbums}
                     

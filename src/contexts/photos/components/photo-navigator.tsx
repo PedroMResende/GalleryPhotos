@@ -38,10 +38,7 @@ export default function PhotoNavigator({
                     icon={ArrowRightIcon}
                     variant="secondary" 
                     disabled={!nextPhotoId}
-                    onClick={() => {navigate(
-                        `
-                        /fotos/${nextPhotoId}
-                        `)
+                    onClick={() => {navigate(`/fotos/${nextPhotoId}`)
                     }}
                     >
                         Próxima Imagem
