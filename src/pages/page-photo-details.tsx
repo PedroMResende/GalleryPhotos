@@ -1,3 +1,4 @@
+import React from "react";
 import Container from "../components/container";
 import Text from "../components/text" ; 
 import {Link, useParams} from "react-router" ; 
@@ -7,16 +8,23 @@ import PhotoNavigator from "../contexts/photos/components/photo-navigator";
 import ImagePreview from "../components/image-preview";
 import Button from "../components/button";
 import AlbumsListSelectable from "../contexts/albums/components/albums-list-selectable";
-import useAlbums from "../contexts/albums/hooks/use-album";
+import useAlbums from "../contexts/albums/hooks/use-albums";
 import usePhoto from "../contexts/photos/hooks/use-photo";
+import PhotoDeleteDialog from "../contexts/photos/components/photo-delete-dialog";
 
 
 export default function PagePhotoDetails() { 
     const {id} = useParams() ; 
     const {albums, isLoadingAlbums} = useAlbums(); 
-    const{photo, isLoadingPhoto, previousPhotoId, nextPhotoId} = usePhoto(id) ; 
-    
-    // apenas para testar o mock 
+    const{photo, isLoadingPhoto, previousPhotoId, nextPhotoId, deletePhoto} = usePhoto(id) ; 
+    const [isDeletingPhoto, setIsDeletingPhoto] = React.useTransition(); 
+
+    function handleDeletePhoto() { 
+        setIsDeletingPhoto(async() => { 
+            await deletePhoto(photo!.id); 
+        })
+    }
+
 
     if(!isLoadingPhoto && !photo) { 
         return (
@@ -55,7 +63,15 @@ export default function PagePhotoDetails() {
                     )}
                     {!isLoadingPhoto ? (
                         <div className="flex justify-between">
-                        <Button variant="destructive"> Excluir </Button>
+                        <PhotoDeleteDialog 
+                        trigger={
+                            <Button variant="destructive" disabled={isDeletingPhoto}>
+                            Excluir
+                            </Button>
+                        }
+                        onConfirm={handleDeletePhoto}
+                        loading={isDeletingPhoto}
+                        />
                         <Link to="/">
                         <Button variant="secondary"> Voltar </Button>
                         </Link>

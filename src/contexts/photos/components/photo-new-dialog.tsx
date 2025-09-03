@@ -1,3 +1,4 @@
+import React from "react";
 import DialogContent, { Dialog, DialogTrigger, DialogHeader, DialogFooter, DialogBody, DialogClose } from "../../../components/dialog";
 import Button from "../../../components/button";
 import InputText from "../../../components/input-text";
@@ -8,8 +9,10 @@ import Text from "../../../components/text";
 import type { Album } from "../../albums/models/album";
 import Skeleton from "../../../components/skeleton";
 import { useForm } from "react-hook-form";
-import useAlbums from "../../albums/hooks/use-album";
-
+import useAlbums from "../../albums/hooks/use-albums";
+import { photoNewFormSchema, type PhotoNewFormSchema } from "../schemas";
+import {zodResolver} from "@hookform/resolvers/zod"; 
+import usePhoto from "../hooks/use-photo";
 
 interface PhotoNewDialogProps {
     trigger: React.ReactNode; 
@@ -17,18 +20,63 @@ interface PhotoNewDialogProps {
 
 export default function PhotoNewDialog({trigger} : PhotoNewDialogProps) { 
 
-    const form = useForm() ; 
+    const [modalOpen, setModalOpen] = React.useState(false); 
+
+    const form = useForm<PhotoNewFormSchema>({
+        resolver: zodResolver(photoNewFormSchema) //vai resolver o formulário com base no schema que a gente passar
+    }) ; 
+
     const {albums, isLoadingAlbums} = useAlbums() ; 
 
+    const {createPhoto} = usePhoto(); 
+
+    const [isCreatingPhoto, setIsCreatingPhoto] = React.useTransition()
+
+    const file = form.watch("file"); 
+
+    const albumsIds = form.watch("albumsIds") ; 
+
+    const fileSource = file?.[0] ? URL.createObjectURL(file[0]) : undefined; 
+
+    React.useEffect(() => {
+        if(!modalOpen) { 
+            form.reset(); 
+        }
+    }, [modalOpen, form]); 
+
+    function handleToggleAlbum(albumId: string) { 
+        const albumsIds = form.getValues("albumsIds"); 
+        const albumsSet = new Set(albumsIds || []) ; 
+
+        if(albumsSet.has(albumId)) { 
+            albumsSet.delete(albumId)
+        } else { 
+            albumsSet.add(albumId)
+        }
+
+        form.setValue("albumsIds", Array.from(albumsSet))
+
+    }
+
+    function handleSumbit(payload: PhotoNewFormSchema) { 
+        setIsCreatingPhoto(async () => {
+            await createPhoto(payload); 
+            setModalOpen(false)
+        })
+        }
+
     return ( 
-        <Dialog>
+        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent> 
+                <form onSubmit={form.handleSubmit(handleSumbit)}>
                 <DialogHeader> Adicionar foto </DialogHeader>
                 <DialogBody className="flex flex-col gap-5">
                     <InputText
                     placeholder="Adicione um título."
                     maxLength={255}
+                    error={form.formState.errors.title?.message}
+                    {...form.register("title")}
                     />
 
                     <Alert>
@@ -43,9 +91,12 @@ export default function PhotoNewDialog({trigger} : PhotoNewDialogProps) {
                     maxFileSizeInMB={50}
                     replaceBy={
                         <ImagePreview
+                        src={fileSource}
                         className="w-full h-56"
                         />
                     }
+                    error={form.formState.errors.file?.message}
+                    {...form.register("file")}
                     />
 
                     <div className="space-y-3">
@@ -54,9 +105,12 @@ export default function PhotoNewDialog({trigger} : PhotoNewDialogProps) {
                         {!isLoadingAlbums && albums.length>0 && albums.map((album) => (
                             <Button
                             key={album.id}
-                            variant="ghost" 
+                            variant={
+                                albumsIds?.includes(album.id) ? "primary" : "ghost"
+                            } 
                             size="sm" 
                             className="truncate"
+                            onClick={() => handleToggleAlbum(album.id)}
                             >
                                 {album.title}
                             </Button>
@@ -74,12 +128,13 @@ export default function PhotoNewDialog({trigger} : PhotoNewDialogProps) {
 
                 <DialogFooter>
                 <DialogClose asChild>
-                    <Button variant="secondary"> Cancelar </Button>
+                    <Button variant="secondary" disabled={isCreatingPhoto}> Cancelar </Button>
                 </DialogClose>
-                <Button>
-                    Adicionar
+                <Button disabled={isCreatingPhoto} handling ={isCreatingPhoto} type="submit">
+                    {isCreatingPhoto ? "Adicionando..." : "Adicionar"}
                 </Button>
                 </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )

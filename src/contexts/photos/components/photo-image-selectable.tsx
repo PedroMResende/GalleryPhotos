@@ -42,7 +42,7 @@ export default function PhotoImageSelectable({
         >
             <InputCheckBox
             size="sm"
-            checked={isSelected}
+            defaultChecked={isSelected}
             onChange={handleSelect}
             className="absolute top-1 left-1"
             />

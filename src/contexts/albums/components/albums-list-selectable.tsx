@@ -5,6 +5,7 @@ import Text from "../../../components/text";
 import InputCheckBox from "../../../components/input-checkbox";
 import Divider from "../../../components/divider";
 import Skeleton from "../../../components/skeleton";
+import usePhotoAlbums from "../../photos/hooks/use-photo-albums";
 
 
 interface AlbumsListSelectableProps { 
@@ -21,6 +22,9 @@ export default function AlbumsListSelectable({
     loading, 
     photo
 }: AlbumsListSelectableProps) { 
+
+    const {managePhotoOnAlbum} = usePhotoAlbums(); 
+    const [isUpdatingPhoto, setIsUpdatingPhoto] = React.useTransition() ; 
 
     function isChecked(albumId: string) { 
     return (
@@ -39,19 +43,23 @@ export default function AlbumsListSelectable({
             albumsIds = [...photo.albums.map(album => album.id), albumId]
         }
 
-        console.log('Enviados para o Back', albumsIds)
+        setIsUpdatingPhoto(async () => { 
+            await managePhotoOnAlbum(photo.id, albumsIds)
+        })
+        
     }
 
 
     return (
         <ul className="flex flex-col gap-4">
-            {!loading && albums?.length > 0 && albums.map((album, index) => (
+            {!loading && photo && albums?.length > 0 && albums.map((album, index) => (
                 <li key={album.id}>
                     <div className="flex items-center justify-between gap-1">
                         <Text variant="paragraph-large" className="truncate">{album.title}</Text>
                         <InputCheckBox
                         defaultChecked={isChecked(album.id)}
-                        onClick={() => handlePhotoOnAlbuns(album.id)}
+                        onChange={() => handlePhotoOnAlbuns(album.id)}
+                        disabled={isUpdatingPhoto}
                         />
                     </div>
                     {index !== albums.length - 1 && <Divider className="mt-4"/>}

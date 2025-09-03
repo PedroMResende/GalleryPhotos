@@ -37,6 +37,7 @@ export const buttonVariants = tv({
 });
 
 export const buttonTextVariants = tv({
+	base : "truncate",
 	variants: {
 		variant: {
 			primary: "text-label-inverse",
