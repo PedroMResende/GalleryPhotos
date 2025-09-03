@@ -6,7 +6,6 @@ import Alert from "../../../components/alert";
 import ImagePreview from "../../../components/image-preview";
 import InputSingleFile from "../../../components/input-single-file";
 import Text from "../../../components/text";
-import type { Album } from "../../albums/models/album";
 import Skeleton from "../../../components/skeleton";
 import { useForm } from "react-hook-form";
 import useAlbums from "../../albums/hooks/use-albums";
