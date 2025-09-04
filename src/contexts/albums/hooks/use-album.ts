@@ -6,9 +6,10 @@ import { api } from "../../../helpers/api";
 import { useQueryClient } from "@tanstack/react-query";
 import usePhotos from "../../photos/hooks/use-photos";
 import usePhotoAlbums from "../../photos/hooks/use-photo-albums";
-
+import { useNavigate } from "react-router";
 
 export default function useAlbum() { 
+    const navigate = useNavigate();
     const queryClient = useQueryClient(); 
     const {photos} = usePhotos(); 
     const {managePhotoOnAlbum} = usePhotoAlbums() ; 
@@ -36,7 +37,24 @@ export default function useAlbum() {
         }
     }
 
+    async function deleteAlbum(albumId : string) { 
+        try { 
+            await api.delete(`/albums/${albumId}`); 
+
+            queryClient.invalidateQueries({queryKey: ["albums"]}); 
+            queryClient.invalidateQueries({queryKey: ["photos"]}); 
+            toast.success("Album excluído com sucesso."); 
+
+            navigate("/"); 
+
+        }  catch (error) { 
+            toast.error("Erro ao excluir album"); 
+            throw error ; 
+        }
+    }
+
     return {
-        createAlbum
+        createAlbum, 
+        deleteAlbum
     }
 }
